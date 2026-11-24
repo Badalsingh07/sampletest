@@ -4,15 +4,17 @@
     "slug": "sampletest",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "icon": "./assets/trading-terminal-icon.png",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#000000",
     "ios": {
       "supportsTablet": true
     },
     "android": {
+      "package": "com.badalsingh07.sampletest",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundColor": "#000000",
+        "foregroundImage": "./assets/trading-terminal-icon.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
@@ -20,6 +22,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "a347c3a9-3dd5-4315-aa25-7fbeb9eb0a25"
+      }
+    },
+    "owner": "badal1775"
   }
 }
