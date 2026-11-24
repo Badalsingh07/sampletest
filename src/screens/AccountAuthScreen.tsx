@@ -1,246 +1,56 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useState } from 'react';
-import {
-  Alert,
-  ImageBackground,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { Alert, ImageBackground, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 export type AuthMode = 'Register' | 'SignIn';
-
-type Props = {
-  mode: AuthMode;
-  onBack: () => void;
-  onSwitch: (mode: AuthMode) => void;
-  onSuccess?: () => void;
-};
-
+type Props = { mode: AuthMode; onBack: () => void; onSwitch: (mode: AuthMode) => void; onSuccess?: () => void };
 const background = require('../../assets/registration_background.png');
 
+/** Local community access only; broker authentication remains separate. */
 export default function AccountAuthScreen({ mode, onBack, onSwitch, onSuccess }: Props) {
   const registering = mode === 'Register';
   const [login, setLogin] = useState('');
-  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [error, setError] = useState('');
 
-  const title = registering ? 'Account registration' : 'Sign in';
-  const submitLabel = registering ? 'Get an Account' : 'Sign In';
-
-  function switchForm() {
-    setEmail('');
-    setPassword('');
-    setPasswordVisible(false);
-    setError('');
-    onSwitch(registering ? 'SignIn' : 'Register');
-  }
-
   function submit() {
-    if (!/^[A-Za-z0-9]+$/.test(login)) {
-      setError('Enter a login using letters and digits without spaces.');
-      return;
-    }
-
-    if (registering && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      setError('Enter a valid email address.');
-      return;
-    }
-
-    if (!registering && (login !== '9009096389673' || password !== 'Pass@1234')) {
-      setError('Use login 9009096389673 and password Pass@1234.');
-      return;
-    }
-
+    if (!/^[A-Za-z0-9]+$/.test(login)) return setError('Use letters and digits without spaces.');
+    if (password.length < 4) return setError('Enter a password with at least 4 characters.');
     setError('');
     setPassword('');
-    setPasswordVisible(false);
-    if (!registering) {
-      onSuccess?.();
-      return;
-    }
-
-    Alert.alert('Demo registration', 'Your demo account registration was accepted.');
+    Alert.alert(registering ? 'Community account created' : 'Community signed in', 'This local community form does not sign you in to the broker account.', [{ text: 'OK', onPress: onSuccess }]);
   }
 
   return (
     <ImageBackground source={background} resizeMode="cover" style={styles.screen}>
       <View style={styles.header}>
-        <Pressable
-          style={styles.iconButton}
-          onPress={onBack}
-          accessibilityRole="button"
-          accessibilityLabel="Back to Messages"
-        >
-          <Ionicons name="arrow-back-outline" size={24} color="#FFFFFF" />
-        </Pressable>
-        <Text style={styles.headerTitle} accessibilityRole="header">
-          {title}
-        </Text>
+        <Pressable style={styles.backButton} onPress={onBack} accessibilityRole="button" accessibilityLabel="Back to Messages"><Ionicons name="arrow-back" size={30} color="#FFFFFF" /></Pressable>
+        <Text style={styles.headerTitle}>Authorize</Text>
       </View>
-
-      <KeyboardAvoidingView
-        style={styles.body}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-        >
-          <View style={styles.form}>
-            <Text style={styles.brand}>App</Text>
-            <Text style={styles.subtitle}>Trading community</Text>
-
-            <Text style={styles.label}>Login</Text>
-            <TextInput
-              style={styles.input}
-              accessibilityLabel="Login"
-              placeholder="Enter your login"
-              placeholderTextColor="#526178"
-              autoCapitalize="none"
-              autoCorrect={false}
-              value={login}
-              onChangeText={(value) => {
-                setLogin(value);
-                setError('');
-              }}
-            />
-            <Text style={styles.hint}>Use letters and digits without spaces.</Text>
-
-            <Text style={styles.label}>{registering ? 'Email' : 'Password'}</Text>
-            {registering ? (
-              <TextInput
-                key="email"
-                style={styles.input}
-                accessibilityLabel="Email"
-                placeholder="Enter your email"
-                placeholderTextColor="#526178"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoCorrect={false}
-                value={email}
-                onChangeText={(value) => {
-                  setEmail(value);
-                  setError('');
-                }}
-                onSubmitEditing={submit}
-              />
-            ) : (
-              <View key="password" style={styles.passwordRow}>
-                <TextInput
-                  style={[styles.input, styles.passwordInput]}
-                  accessibilityLabel="Password"
-                  placeholder="Enter your password"
-                  placeholderTextColor="#526178"
-                  secureTextEntry={!passwordVisible}
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  value={password}
-                  onChangeText={(value) => {
-                    setPassword(value);
-                    setError('');
-                  }}
-                  onSubmitEditing={submit}
-                />
-                <Pressable
-                  style={styles.iconButton}
-                  accessibilityRole="button"
-                  accessibilityLabel={passwordVisible ? 'Hide password' : 'Show password'}
-                  onPress={() => setPasswordVisible((visible) => !visible)}
-                >
-                  <Ionicons
-                    name={passwordVisible ? 'eye-off-outline' : 'eye-outline'}
-                    size={23}
-                    color="#365F9B"
-                  />
-                </Pressable>
-              </View>
-            )}
-
-            {!!error && (
-              <Text style={styles.error} accessibilityLiveRegion="polite">
-                {error}
-              </Text>
-            )}
-
-            <Pressable
-              style={[styles.button, styles.primaryButton]}
-              accessibilityRole="button"
-              onPress={submit}
-            >
-              <Text style={styles.buttonText}>{submitLabel}</Text>
-            </Pressable>
-
-            <Text style={styles.divider}>or</Text>
-
-            <Pressable
-              style={[styles.button, styles.googleButton]}
-              accessibilityRole="button"
-              onPress={() =>
-                Alert.alert('Sign in with Google', 'Google sign-in requires configuration.')
-              }
-            >
-              <Text style={styles.buttonText}>Sign in with Google</Text>
-            </Pressable>
-
-            <Pressable
-              style={styles.switchButton}
-              accessibilityRole="button"
-              onPress={switchForm}
-            >
-              <Text style={styles.switchText}>
-                {registering ? 'Already have an account? ' : 'New here? '}
-                <Text style={styles.switchLink}>{registering ? 'Sign in' : 'Register'}</Text>
-              </Text>
-            </Pressable>
+      <KeyboardAvoidingView style={styles.content} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <View style={styles.form}>
+          <Text style={styles.brand}>TRADEHUB</Text>
+          <Text style={styles.headline}>Join trader&apos;s community{`\n`}tradehub.local</Text>
+          <TextInput style={styles.input} placeholder="Login" placeholderTextColor="#FFFFFF" accessibilityLabel="Community login" autoCapitalize="none" autoCorrect={false} value={login} onChangeText={(value) => { setLogin(value); setError(''); }} />
+          <Text style={styles.hint}>Latin characters and digits without spaces</Text>
+          <View style={styles.passwordRow}>
+            <TextInput style={styles.passwordInput} placeholder="Password" placeholderTextColor="#FFFFFF" accessibilityLabel="Community password" secureTextEntry={!passwordVisible} autoCapitalize="none" autoCorrect={false} value={password} onChangeText={(value) => { setPassword(value); setError(''); }} onSubmitEditing={submit} />
+            <Pressable style={styles.eyeButton} onPress={() => setPasswordVisible((current) => !current)} accessibilityRole="button" accessibilityLabel={passwordVisible ? 'Hide password' : 'Show password'}><Ionicons name={passwordVisible ? 'eye-off-outline' : 'eye-outline'} size={30} color="#2362B7" /></Pressable>
           </View>
-        </ScrollView>
+          {!!error && <Text style={styles.error} accessibilityLiveRegion="polite">{error}</Text>}
+          <Text style={styles.supporting}>Authorize and chat with traders right here and now</Text>
+          <Pressable style={styles.primaryButton} onPress={submit} accessibilityRole="button"><Text style={styles.primaryLabel}>{registering ? 'Register' : 'Sign In'}</Text></Pressable>
+          <Text style={styles.or}>or</Text>
+          <Pressable style={styles.googleButton} onPress={() => Alert.alert('Google sign-in', 'Google sign-in is not configured for this local demo.')} accessibilityRole="button"><Text style={styles.googleG}>G</Text><Text style={styles.googleLabel}>Sign in with Google</Text></Pressable>
+          <Pressable style={styles.switchButton} onPress={() => onSwitch(registering ? 'SignIn' : 'Register')} accessibilityRole="button"><Text style={styles.switchText}>{registering ? 'Already have an account? ' : "If you don't have an account, please "}<Text style={styles.switchLink}>{registering ? 'sign in' : 'register'}</Text></Text></Pressable>
+          <Text style={styles.footer}>Visit <Text style={styles.switchLink}>tradehub.local</Text> to access community services.</Text>
+        </View>
       </KeyboardAvoidingView>
     </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: '#000000' },
-  body: { flex: 1 },
-  header: { minHeight: 54, flexDirection: 'row', alignItems: 'center' },
-  headerTitle: { flex: 1, color: '#FFFFFF', fontSize: 19, fontWeight: '600' },
-  iconButton: { width: 48, minHeight: 48, alignItems: 'center', justifyContent: 'center' },
-  scrollContent: { paddingHorizontal: 28, paddingTop: 20, paddingBottom: 32 },
-  form: { width: '100%', maxWidth: 440, alignSelf: 'center' },
-  brand: { color: '#FFFFFF', fontSize: 32, fontWeight: '800' },
-  subtitle: { color: '#FFFFFF', fontSize: 17, marginTop: 4, marginBottom: 28 },
-  label: { color: '#FFFFFF', fontSize: 15, fontWeight: '700', marginBottom: 8 },
-  input: {
-    minHeight: 54,
-    backgroundColor: '#24262B',
-    color: '#172B44',
-    paddingHorizontal: 14,
-    borderRadius: 8,
-    fontSize: 16,
-  },
-  hint: { color: '#FFFFFF', fontSize: 13, marginTop: 8, marginBottom: 20 },
-  passwordRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#24262B',
-    borderRadius: 8,
-  },
-  passwordInput: { flex: 1 },
-  error: { color: '#FFFFFF', backgroundColor: '#802D3D', padding: 10, marginTop: 12 },
-  button: { minHeight: 48, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
-  primaryButton: { backgroundColor: '#3385F6', marginTop: 24 },
-  googleButton: { backgroundColor: '#24262B' },
-  buttonText: { color: '#172B44', fontSize: 16, fontWeight: '700' },
-  divider: { color: '#FFFFFF', textAlign: 'center', marginVertical: 14 },
-  switchButton: { minHeight: 48, justifyContent: 'center', marginTop: 12 },
-  switchText: { color: '#FFFFFF', textAlign: 'center', fontSize: 15 },
-  switchLink: { color: '#FFD671', fontWeight: '700', textDecorationLine: 'underline' },
+  screen: { flex: 1, backgroundColor: '#4D7EBB' }, header: { height: 64, flexDirection: 'row', alignItems: 'center' }, backButton: { width: 64, height: 56, alignItems: 'center', justifyContent: 'center' }, headerTitle: { color: '#FFFFFF', fontSize: 25, fontWeight: '500' }, content: { flex: 1, justifyContent: 'center' }, form: { width: '100%', maxWidth: 560, alignSelf: 'center', paddingHorizontal: 42, paddingBottom: 34 }, brand: { color: '#FFFFFF', fontWeight: '900', fontSize: 39, letterSpacing: -1, textAlign: 'center', marginBottom: 35 }, headline: { color: '#FFFFFF', fontSize: 28, lineHeight: 37, textAlign: 'center', marginBottom: 58 }, input: { height: 72, borderRadius: 5, backgroundColor: '#151515', color: '#FFFFFF', paddingHorizontal: 20, fontSize: 20 }, hint: { color: '#FFFFFF', fontSize: 14, textAlign: 'center', marginTop: 12, marginBottom: 33 }, passwordRow: { height: 72, borderRadius: 5, flexDirection: 'row', alignItems: 'center', backgroundColor: '#151515' }, passwordInput: { flex: 1, height: 72, color: '#FFFFFF', paddingLeft: 20, fontSize: 20 }, eyeButton: { width: 64, height: 64, alignItems: 'center', justifyContent: 'center' }, error: { color: '#FFE2E2', textAlign: 'center', marginTop: 10, fontSize: 13 }, supporting: { color: '#FFFFFF', fontSize: 15, textAlign: 'center', marginTop: 22, marginBottom: 31 }, primaryButton: { height: 62, borderRadius: 3, alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFC42C' }, primaryLabel: { color: '#FFFFFF', fontSize: 20, fontWeight: '700' }, or: { color: '#FFFFFF', fontSize: 20, textAlign: 'center', marginVertical: 18 }, googleButton: { height: 62, borderRadius: 3, backgroundColor: '#FFFFFF', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 18 }, googleG: { color: '#4285F4', fontSize: 28, fontWeight: '900' }, googleLabel: { color: '#5D5D5D', fontSize: 18, fontWeight: '700' }, switchButton: { alignSelf: 'center', paddingVertical: 26 }, switchText: { color: '#FFFFFF', fontSize: 16, textAlign: 'center' }, switchLink: { color: '#FFDB4F', fontWeight: '700' }, footer: { color: '#FFFFFF', fontSize: 15, textAlign: 'center' },
 });

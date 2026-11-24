@@ -61,7 +61,7 @@ const initialQuote: SymbolQuote = {
 };
 
 export default function App() {
-  const [screen, setScreen] = useState<Screen>('Quotes');
+  const [screen, setScreen] = useState<Screen>('Trade');
   const [chartQuote, setChartQuote] = useState(initialQuote);
   const [orderQuote, setOrderQuote] = useState(initialQuote);
   const [orderOrigin, setOrderOrigin] = useState<OrderOrigin>('Quotes');
@@ -99,7 +99,10 @@ export default function App() {
 
   function changeTab(tab: Tab) {
     setSidebarOpen(false);
-    setScreen(tab);
+    // A broker session is required before market, chart, account and history
+    // data can be displayed. Messages remains available so a guest can open
+    // the separate community sign-in form.
+    setScreen(!loggedIn && tab !== 'Messages' ? 'Trade' : tab);
   }
 
   function renderSidebarTabs(closeSidebar: () => void) {
@@ -222,7 +225,7 @@ export default function App() {
             <QuotesScreen
               loggedIn={loggedIn}
               onLoginSuccess={() => setLoggedIn(true)}
-              onLogout={() => { setLoggedIn(false); setScreen('Quotes'); }}
+              onLogout={() => { setLoggedIn(false); setScreen('Trade'); }}
               positions={account.positions}
               simple={simple}
               onToggleView={() => setSimple((current) => !current)}
@@ -258,7 +261,7 @@ export default function App() {
             <TradeScreen
               loggedIn={loggedIn}
               onLoginSuccess={() => setLoggedIn(true)}
-              onLogout={() => { setLoggedIn(false); setScreen('Quotes'); }}
+              onLogout={() => { setLoggedIn(false); setScreen('Trade'); }}
               balance={account.balance}
               positions={account.positions}
               onNewOrder={() => openOrder(orderQuote, 'Trade')}
@@ -292,10 +295,7 @@ export default function App() {
               mode={authMode}
               onBack={() => changeTab('Messages')}
               onSwitch={openAuth}
-              onSuccess={() => {
-                setLoggedIn(true);
-                changeTab('Quotes');
-              }}
+              onSuccess={() => changeTab('Messages')}
             />
           )}
 
@@ -307,7 +307,7 @@ export default function App() {
             (screen === 'Charts' ||
               screen === 'History' ||
               screen === 'Messages') && (
-              <SidebarMenu onClose={() => setSidebarOpen(false)} loggedIn={loggedIn} balance={account.balance} onLoginSuccess={() => setLoggedIn(true)} onLogout={() => { setLoggedIn(false); setSidebarOpen(false); setScreen('Quotes'); }} />
+              <SidebarMenu onClose={() => setSidebarOpen(false)} loggedIn={loggedIn} balance={account.balance} onLoginSuccess={() => setLoggedIn(true)} onLogout={() => { setLoggedIn(false); setSidebarOpen(false); setScreen('Trade'); }} />
             )}
         </SafeAreaView>
       </SidebarTabsContext.Provider>
