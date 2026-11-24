@@ -395,17 +395,14 @@ function DragHandle({ symbol, onDrag, onEnd, onCancel, canMoveUp, canMoveDown, o
   canMoveDown: boolean;
   onMove: (offset: number) => void;
 }) {
-  const callbacks = useRef({ onDrag, onEnd, onCancel });
-  callbacks.current = { onDrag, onEnd, onCancel };
-
-  const [responder] = useState(() => PanResponder.create({
+  const responder = useMemo(() => PanResponder.create({
     onStartShouldSetPanResponder: () => true,
-    onPanResponderGrant: () => callbacks.current.onDrag(0),
-    onPanResponderMove: (_, gesture) => callbacks.current.onDrag(gesture.dy),
-    onPanResponderRelease: (_, gesture) => callbacks.current.onEnd(gesture.dy),
-    onPanResponderTerminate: () => callbacks.current.onCancel(),
+    onPanResponderGrant: () => onDrag(0),
+    onPanResponderMove: (_, gesture) => onDrag(gesture.dy),
+    onPanResponderRelease: (_, gesture) => onEnd(gesture.dy),
+    onPanResponderTerminate: onCancel,
     onPanResponderTerminationRequest: () => false,
-  }));
+  }), [onCancel, onDrag, onEnd]);
 
   return (
     <View {...responder.panHandlers} style={watchStyles.handle} accessible
